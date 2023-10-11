@@ -1,0 +1,51 @@
+using System;
+using System.Drawing;
+using Emgu.CV;
+using Emgu.CV.CvEnum;
+using Emgu.CV.Structure;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        // Инициализация камеры
+        VideoCapture capture = new VideoCapture(0); // 0 - индекс камеры (может потребоваться изменить)
+
+        if (!capture.IsOpened)
+        {
+            Console.WriteLine("Не удалось открыть камеру.");
+            return;
+        }
+
+        // Определите параметры обнаружения маркировок
+        CascadeClassifier metalSheetCascade = new CascadeClassifier("metal_sheet_cascade.xml"); // Пример файла для обнаружения маркировок на листах металла
+
+        // Создайте окно для отображения видеопотока
+        CvInvoke.NamedWindow("Stack Tracking", WindowFlags.Normal);
+
+        while (true)
+        {
+            Mat frame = new Mat();
+            capture.Read(frame);
+
+            if (frame.IsEmpty)
+                break;
+
+            // Примените детектор кадров
+            Rectangle[] metalSheetsDetected = metalSheetCascade.DetectMultiScale(frame);
+
+            // Отображение результатов
+            foreach (Rectangle metalSheet in metalSheetsDetected)
+            {
+                CvInvoke.Rectangle(frame, metalSheet, new Bgr(0, 255, 0).MCvScalar, 2);
+
+                // Здесь можно добавить код для отслеживания стеков на основе маркировок листов металла.
+                // Например, определение стека на основе расположения и количества листов.
+            }
+
+            CvInvoke.Imshow("Stack Tracking", frame);
+            if (CvInvoke.WaitKey(1) == 27) // Выход при нажатии клавиши "Esc"
+                break;
+        }
+    }
+}
