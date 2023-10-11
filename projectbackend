@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
@@ -20,8 +21,8 @@ class Program
         // Определите параметры обнаружения маркировок
         CascadeClassifier metalSheetCascade = new CascadeClassifier("metal_sheet_cascade.xml"); // Пример файла для обнаружения маркировок на листах металла
 
-        // Создайте окно для отображения видеопотока
-        CvInvoke.NamedWindow("Stack Tracking", WindowFlags.Normal);
+        // Словарь для отслеживания количества листов каждой марки стали
+        Dictionary<string, int> steelCount = new Dictionary<string, int>();
 
         while (true)
         {
@@ -34,18 +35,39 @@ class Program
             // Примените детектор кадров
             Rectangle[] metalSheetsDetected = metalSheetCascade.DetectMultiScale(frame);
 
-            // Отображение результатов
+            // Обновление информации о стеках
             foreach (Rectangle metalSheet in metalSheetsDetected)
             {
                 CvInvoke.Rectangle(frame, metalSheet, new Bgr(0, 255, 0).MCvScalar, 2);
 
-                // Здесь можно добавить код для отслеживания стеков на основе маркировок листов металла.
-                // Например, определение стека на основе расположения и количества листов.
+                // Здесь можно добавить код для обработки информации о стеках и марках стали.
+                // Например, определение марки стали на основе маркировок на листах.
+
+                string detectedMark = "SomeSteelMark"; // Пример определения марки стали
+
+                // Обновление информации о количестве листов каждой марки
+                if (steelCount.ContainsKey(detectedMark))
+                {
+                    steelCount[detectedMark]++;
+                }
+                else
+                {
+                    steelCount[detectedMark] = 1;
+                }
             }
+
+            // Здесь можно добавить код для обработки ушедших и оставшихся листов.
 
             CvInvoke.Imshow("Stack Tracking", frame);
             if (CvInvoke.WaitKey(1) == 27) // Выход при нажатии клавиши "Esc"
                 break;
+        }
+
+        // Вывод информации о марках стали и количестве листов каждой марки
+        Console.WriteLine("Информация о марках стали:");
+        foreach (var steel in steelCount)
+        {
+            Console.WriteLine($"Марка стали: {steel.Key}, Количество листов: {steel.Value}");
         }
     }
 }
