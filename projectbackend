@@ -24,6 +24,9 @@ class Program
         // Словарь для отслеживания количества листов каждой марки стали
         Dictionary<string, int> steelCount = new Dictionary<string, int>();
 
+        // Словарь для отслеживания стеков металла
+        Dictionary<string, int> stackCount = new Dictionary<string, int>();
+
         while (true)
         {
             Mat frame = new Mat();
@@ -32,7 +35,7 @@ class Program
             if (frame.IsEmpty)
                 break;
 
-            // Примените детектор кадров
+            // детектор кадров
             Rectangle[] metalSheetsDetected = metalSheetCascade.DetectMultiScale(frame);
 
             // Обновление информации о стеках
@@ -40,7 +43,7 @@ class Program
             {
                 CvInvoke.Rectangle(frame, metalSheet, new Bgr(0, 255, 0).MCvScalar, 2);
 
-                // Здесь можно добавить код для обработки информации о стеках и марках стали.
+                // тут нужно добавить код для обработки информации о стеках и марках стали.
                 // Например, определение марки стали на основе маркировок на листах.
 
                 string detectedMark = "SomeSteelMark"; // Пример определения марки стали
@@ -54,9 +57,30 @@ class Program
                 {
                     steelCount[detectedMark] = 1;
                 }
+
+                // Обновление информации о стеках
+                if (stackCount.ContainsKey(detectedMark))
+                {
+                    stackCount[detectedMark]++;
+                }
+                else
+                {
+                    stackCount[detectedMark] = 1;
+                }
             }
 
-            // Здесь можно добавить код для обработки ушедших и оставшихся листов.
+            // Здесь нужно добавить код для обработки ушедших и оставшихся листов.
+            foreach (var stack in stackCount)
+            {
+                if (!steelCount.ContainsKey(stack.Key))
+                {
+                    // Листы данной марки ушли
+                    Console.WriteLine($"Ушли листы марки {stack.Key}: {stack.Value} штук.");
+                }
+            }
+
+            // Очищаем информацию о стеках
+            stackCount.Clear();
 
             CvInvoke.Imshow("Stack Tracking", frame);
             if (CvInvoke.WaitKey(1) == 27) // Выход при нажатии клавиши "Esc"
@@ -69,5 +93,25 @@ class Program
         {
             Console.WriteLine($"Марка стали: {steel.Key}, Количество листов: {steel.Value}");
         }
+    }
+}
+
+
+
+......
+
+using Emgu.CV;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace projectUralSteel
+{
+    internal class go
+    {
+        static string videoPath = "путь_к_видео_или_изображению.mp4"; 
+        VideoCapture capture = new VideoCapture(videoPath);
     }
 }
